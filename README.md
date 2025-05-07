@@ -4,7 +4,7 @@
 This is a Microservices-based banking application built with Spring Boot, using FeignClient for inter-service communication. All dependent services must be running to avoid errors.
 
 # Key Features
-
+UI : Contains the frontend code for the application.
 Account Management: Create and delete user accounts.
 Balance Enquiry: Check account balances.
 Deposit and Withdrawal: Handle money transactions securely.
