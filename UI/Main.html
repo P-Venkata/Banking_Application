@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Banking Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        nav a { margin: 10px; cursor: pointer; text-decoration: underline; color: blue; }
+        section { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Banking Application Dashboard</h1>
+
+    <nav>
+        <a onclick="showSection('create')">Create Account</a>
+        <a onclick="showSection('delete')">Delete Account</a>
+        <a onclick="showSection('balance')">Balance Enquiry</a>
+        <a onclick="showSection('deposit')">Deposit</a>
+        <a onclick="showSection('withdraw')">Withdraw</a>
+    </nav>
+
+    <!-- Sections -->
+    <section id="create">
+        <h2>Create Account</h2>
+        <form id="accountForm">
+            <input name="username" placeholder="Username" required /><br />
+            <input name="password" type="password" placeholder="Password" required /><br />
+            <input name="email" type="email" placeholder="Email" required /><br />
+            <input name="phone" placeholder="Phone" required /><br />
+            <button type="submit">Create Account</button>
+        </form>
+        <p id="createResponse"></p>
+    </section>
+
+    <section id="delete">
+        <h2>Delete Account</h2>
+        <form id="deleteForm">
+            <input id="delId" type="number" placeholder="Account ID" required /><br />
+            <input id="delPassword" type="password" placeholder="Password" required /><br />
+            <button type="submit">Delete Account</button>
+        </form>
+        <p id="deleteResponse"></p>
+    </section>
+
+    <section id="balance">
+        <h2>Balance Enquiry</h2>
+        <form id="balanceForm">
+            <input id="balId" type="number" placeholder="Account ID" required /><br />
+            <input id="balPassword" type="password" placeholder="Password" required /><br />
+            <button type="submit">Check Balance</button>
+        </form>
+        <p id="balanceResponse"></p>
+    </section>
+
+    <section id="deposit">
+        <h2>Deposit</h2>
+        <form id="depositForm">
+            <input id="depId" type="number" placeholder="Account ID" required /><br />
+            <input id="depPassword" type="password" placeholder="Password" required /><br />
+            <input id="depAmount" type="number" placeholder="Amount" required /><br />
+            <button type="submit">Deposit</button>
+        </form>
+        <p id="depositResponse"></p>
+    </section>
+
+    <section id="withdraw">
+        <h2>Withdraw</h2>
+        <form id="withdrawForm">
+            <input id="wdId" type="number" placeholder="Account ID" required /><br />
+            <input id="wdPassword" type="password" placeholder="Password" required /><br />
+            <input id="wdAmount" type="number" placeholder="Amount" required /><br />
+            <button type="submit">Withdraw</button>
+        </form>
+        <p id="withdrawResponse"></p>
+    </section>
+
+    <script>
+        function showSection(id) {
+            document.querySelectorAll("section").forEach(s => s.style.display = "none");
+            document.getElementById(id).style.display = "block";
+        }
+
+        // Create Account
+        document.getElementById('accountForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                username: form.username.value,
+                password: form.password.value,
+                email: form.email.value,
+                phone: form.phone.value
+            };
+
+            const res = await fetch('http://localhost:8080/accounts/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            document.getElementById('createResponse').innerText = await res.text();
+        });
+
+        // Delete Account
+        document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('delId').value);
+            const password = document.getElementById('delPassword').value;
+
+            const res = await fetch('http://localhost:8081/accounts/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, password })
+            });
+
+            document.getElementById('deleteResponse').innerText = await res.text();
+        });
+
+        // Balance Enquiry
+        document.getElementById('balanceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('balId').value;
+            const password = document.getElementById('balPassword').value;
+
+            const res = await fetch(`http://localhost:8083/bank/enquiry?id=${id}&password=${password}`);
+            const data = await res.text();
+            document.getElementById('balanceResponse').innerText = isNaN(data) ? data : `Balance: ₹${data}`;
+        });
+
+        // Deposit
+        document.getElementById('depositForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('depId').value;
+            const password = document.getElementById('depPassword').value;
+            const amount = document.getElementById('depAmount').value;
+
+            const params = new URLSearchParams({ id, password, amount });
+            const res = await fetch(`http://localhost:8084/deposit?${params.toString()}`, {
+                method: "POST"
+            });
+            document.getElementById('depositResponse').innerText = await res.text();
+        });
+
+        // Withdraw
+        document.getElementById('withdrawForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('wdId').value;
+            const password = document.getElementById('wdPassword').value;
+            const amount = document.getElementById('wdAmount').value;
+
+            const res = await fetch("http://localhost:8085/withdraw/withdrawal", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id=${id}&password=${password}&amount=${amount}`
+            });
+            document.getElementById('withdrawResponse').innerText = await res.text();
+        });
+    </script>
+</body>
+</html>
